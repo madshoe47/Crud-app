@@ -15,28 +15,39 @@
 </template>
 
 <script>
+import db from '@/firebase/init'
+
 export default {
   name: "Index",
   data() {
     return {
-foods: [
-  {
-    title: "Lasagne", slug: 'lasagne', ingredients: ['Tomater', 'Oksekød', 'Hvidløg', 'Oregano', 'Gulerod', 'Løg'], id: '1'
-  },
-  {
-    title: "Spaghetti Carbonara", slug: 'spaghetti-carbonara', ingredients: ['Spaghetti', 'Bacon', 'Løg', 'Oregano', 'Parmesan', 'Æg'], id: '2'
-  }
-]
+      foods: []
     }
   }, 
   methods: {
     deleteFood(id) {
-      this.foods = this.foods.filter(food => {
-        return food.id != id
+      // Delete doc from firestore
+      db.collection('foods').doc(id).delete()
+      .then(() => {
+        this.foods = this.foods.filter(food => {
+          return food.id != id
+        })
       })
     }
+  }, 
+  created(){
+    // fetch data from firestore
+    db.collection('foods').get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let food = doc.data()
+        food.id = doc.id
+        this.foods.push(food)
+      })
+      });
+    }
   }
-  }
+  
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
